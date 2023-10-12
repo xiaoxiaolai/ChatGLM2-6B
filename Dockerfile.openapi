@@ -1,0 +1,8 @@
+FROM nvidia/cuda:12.2.0-runtime-ubuntu20.04
+WORKDIR /app
+COPY ../chatglm2-6b ./THUDM/chatglm2-6b
+COPY ./ChatGLM2-6B/openai_api.py .
+RUN apt update && apt install python3-pip -y
+RUN pip3 install --upgrade pip --user -i https://pypi.tuna.tsinghua.edu.cn/simple/
+RUN pip3 --no-cache-dir install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
+CMD ["python3", "openai_api.py"]
