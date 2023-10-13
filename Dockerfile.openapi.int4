@@ -17,10 +17,11 @@ RUN git clone https://huggingface.co/THUDM/chatglm2-6b-int4
 FROM nvidia/cuda:12.2.0-runtime-ubuntu20.04
 WORKDIR /app
 
-COPY --from=model /app/chatglm2-6b-int4 ./THUDM/chatglm2-6b-int4
-COPY --from=huggingface /app/pytorch_model.bin ./THUDM/chatglm2-6b-int4/pytorch_model.bin
-COPY --from=huggingface /app/tokenizer.model ./THUDM/chatglm2-6b-int4/tokenizer.model
-COPY ./ChatGLM2-6B/openai_api_int4.py .
+COPY --from=huggingface /app/chatglm2-6b-int4 ./THUDM/chatglm2-6b-int4
+COPY --from=model /app/pytorch_model.bin ./THUDM/chatglm2-6b-int4/pytorch_model.bin
+COPY --from=model /app/tokenizer.model ./THUDM/chatglm2-6b-int4/tokenizer.model
+COPY ./openai_api_int4.py .
+COPY ./requirements.txt .
 
 RUN apt update && apt install python3-pip -y
 RUN pip3 install --upgrade pip --user -i https://pypi.tuna.tsinghua.edu.cn/simple/
