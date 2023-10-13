@@ -1,6 +1,6 @@
 FROM bash:alpine3.15 as model
-ARG port
-ENV http-proxy=http://host.docker.internal:${port} https-proxy=http://host.docker.internal:${port} all_proxy=http://host.docker.internal:${port}
+ARG proxy
+ENV all_proxy=${proxy}
 RUN apk add aria2
 WORKDIR /app
 COPY ./chatglm2-6b-int4-links.txt ./chatglm2-6b-int4-links.txt
@@ -10,9 +10,10 @@ RUN ./download.sh
 
 FROM alpine/git:2.36.2 as huggingface
 WORKDIR /app
-ARG port
+ARG proxy
 ENV GIT_LFS_SKIP_SMUDGE=1
-RUN git clone -c http.proxy=http://host.docker.internal:${port} https://huggingface.co/THUDM/chatglm2-6b-int4
+ENV all_proxy=${proxy}
+RUN git clone https://huggingface.co/THUDM/chatglm2-6b-int4
 
 
 FROM nvidia/cuda:12.2.0-runtime-ubuntu20.04
