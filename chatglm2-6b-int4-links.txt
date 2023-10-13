@@ -1,0 +1,4 @@
+https://huggingface.co/THUDM/chatglm2-6b-int4/resolve/main/pytorch_model.bin
+  out=pytorch_model.bin
+https://huggingface.co/THUDM/chatglm2-6b-int4/resolve/main/tokenizer.model
+  out=tokenizer.model

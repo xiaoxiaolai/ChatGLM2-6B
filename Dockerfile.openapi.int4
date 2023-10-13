@@ -1,0 +1,28 @@
+FROM bash:alpine3.15 as model
+RUN apk add aria2
+ENV http-proxy=http://host.docker.internal:1080 https-proxy=http://host.docker.internal:1080 all_proxy=http://host.docker.internal:1080
+WORKDIR /app
+COPY ./chatglm2-6b-int4-links.txt ./chatglm2-6b-int4-links.txt
+COPY ./download.sh ./download.sh
+RUN chmod +x ./download.sh
+RUN ./download.sh
+
+FROM alpine/git:2.36.2 as huggingface
+WORKDIR /app
+ENV http-proxy=http://host.docker.internal:1080 https-proxy=http://host.docker.internal:1080 all_proxy=http://host.docker.internal:1080
+ENV GIT_LFS_SKIP_SMUDGE=1
+RUN git clone https://huggingface.co/THUDM/chatglm2-6b-int4
+
+
+FROM nvidia/cuda:12.2.0-runtime-ubuntu20.04
+WORKDIR /app
+
+COPY --from=model /app/chatglm2-6b-int4 ./THUDM/chatglm2-6b-int4
+COPY --from=huggingface /app/pytorch_model.bin ./THUDM/chatglm2-6b-int4/pytorch_model.bin
+COPY --from=huggingface /app/tokenizer.model ./THUDM/chatglm2-6b-int4/tokenizer.model
+COPY ./ChatGLM2-6B/openai_api_int4.py .
+
+RUN apt update && apt install python3-pip -y
+RUN pip3 install --upgrade pip --user -i https://pypi.tuna.tsinghua.edu.cn/simple/
+RUN pip3 --no-cache-dir install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple/
+CMD ["python3", "openai_api_int4.py"]
